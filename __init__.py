@@ -1,12 +1,13 @@
 # Check if addon is being reloaded
 # This also allows script.reload() to reload the addon
 if "multires_transpose" not in locals():
-    from . import multires_transpose
+    from . import multires_transpose, ui
 else:
     import importlib
     multires_transpose = importlib.reload(multires_transpose)
+    ui = importlib.reload(ui)
 
-modules = [multires_transpose]
+modules = [multires_transpose, ui]
 
 bl_info = {
     "name": "Multires Transpose",
