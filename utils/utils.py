@@ -60,13 +60,13 @@ def split_meshes_by_original_name(object: bpy.types.Object) -> List[bpy.types.Ob
 
     with bmesh_from_obj(object) as bm:
         original_obj_names = read_layer_data(bm, MeshDomain.FACES, MeshLayerType.STRING, ORIGINAL_OBJECT_NAME_LAYER, uniform=False)
-        tranpose_map = {name: [] for name in set(original_obj_names)}
+        transpose_map = {name: [] for name in set(original_obj_names)}
 
         # Create a map of original object names to faces
         for face, name in zip(bm.faces, original_obj_names):
-            tranpose_map[name].append(face)
+            transpose_map[name].append(face)
 
-        for obj_name, faces in tranpose_map.items():
+        for obj_name, faces in transpose_map.items():
             face_index_min = min([f.index for f in faces])
             face_index_max = max([f.index for f in faces])
 
