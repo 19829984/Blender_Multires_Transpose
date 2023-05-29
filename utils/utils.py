@@ -124,7 +124,6 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
     transpose_target_mesh = bpy.data.meshes.new(name="Multires_Transpose_Target")
 
     multires_objs, multires_levels = set_multires_to_nth_level(objects, level)
-    non_multires_objects = [obj for obj in objects if obj not in multires_objs]
     depsgraph = context.evaluated_depsgraph_get()
 
     final_bm = bmesh.new()
@@ -137,7 +136,9 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
         final_bm = bmesh_join([bm, final_bm])
         bm.free()
         merged_objs.append(object)
+
     if use_non_multires:
+        non_multires_objects = [obj for obj in objects if obj not in multires_objs]
         for object in non_multires_objects:
             bm = bmesh.new()
             bm.from_mesh(object.data)
