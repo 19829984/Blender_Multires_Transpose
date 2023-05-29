@@ -132,7 +132,7 @@ def copy_all_layers(src_bmesh: bmesh.types.BMesh, dst_bmesh: bmesh.types.BMesh) 
 
 def bmesh_from_faces(src_bmesh: bmesh.types.BMesh, faces: Iterable[bmesh.types.BMFace]) -> bmesh.types.BMesh:
     """
-    Create a new bmesh from a given sequence of faces
+    Create a new bmesh from a given sequence of faces from the given src_bmesh
 
     Args:
         src_bmesh (bmesh.types.BMesh): source bmesh to copy from
@@ -208,3 +208,19 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
         bm.normal_update()
 
     return bm
+
+
+def bmesh_copy_vert_location(src_bmesh, dst_bmesh):
+    """
+    Copy the vertex locations from src_bmesh to dst_bmesh by vertex indieces.
+    Both must have the same number of vertices.
+
+    Args:
+        src_bmesh (bmesh.types.BMesh): source bmesh to copy from
+        dst_bmesh (bmesh.types.BMesh): destination bmesh to copy to
+    """
+    if len(src_bmesh.verts) != len(dst_bmesh.verts):
+        raise ValueError("src_bmesh and dst_bmesh must have the same number of vertices")
+
+    for src_v, dst_v in zip(src_bmesh.verts, dst_bmesh.verts):
+        dst_v.co = src_v.co
