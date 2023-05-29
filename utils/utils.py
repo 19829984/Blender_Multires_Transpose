@@ -91,7 +91,7 @@ def create_meshes_by_original_name(object: bpy.types.Object) -> List[bpy.types.O
     return split_objects
 
 
-def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable[bpy.types.Object], level: int | None = 1, use_non_multires: bool = False) -> bpy.types.Object:
+def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable[bpy.types.Object], level: int | None = 1, use_non_multires: bool = False) -> Tuple[bpy.types.Object, List[bpy.types.Object]]:
     """
     Copy all objects to a new mesh at the given multires level, if they have a multires modifier.
 
@@ -103,6 +103,7 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
 
     Returns:
         bpy.types.Object: merged object
+        List[bpy.types.Object]: list of objects that were merged
     """
     def record_data_helper(bm, object, multires_level):
         # Apply transformations to the mesh
@@ -128,6 +129,7 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
     depsgraph = context.evaluated_depsgraph_get()
 
     final_bm = bmesh.new()
+    merged_objs = []
 
     for i, object in enumerate(multires_objs):
         bm = bmesh.new()
@@ -135,6 +137,7 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
         record_data_helper(bm, object, multires_levels[i])
         final_bm = bmesh_join([bm, final_bm])
         bm.free()
+        merged_objs.append(object)
     if use_non_multires:
         for object in non_multires_objects:
             bm = bmesh.new()
@@ -142,10 +145,11 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
             record_data_helper(bm, object, None)
             final_bm = bmesh_join([bm, final_bm])
             bm.free()
+            merged_objs.append(object)
 
     final_bm.to_mesh(transpose_target_mesh)
     final_bm.free()
 
     transpose_target_obj = bpy.data.objects.new(name="Multires_Transpose_Target", object_data=transpose_target_mesh)
     context.collection.objects.link(transpose_target_obj)
-    return transpose_target_obj
+    return transpose_target_obj, merged_objs

@@ -25,15 +25,21 @@ class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
     multires_level: bpy.props.IntProperty(name="Multires Level", default=1, min=0)
     use_multires_level_as_is: bpy.props.BoolProperty(name="Use Multires Level As Is", default=False)
     include_non_multires: bpy.props.BoolProperty(name="Include Non-Multires Objects", default=False)
+    hide_original: bpy.props.BoolProperty(name="Hide Original Objects", default=True)
 
     def execute(self, context):
         start_time = time.time()
         multires_level = self.multires_level if not self.use_multires_level_as_is else None
-        transpose_target = copy_multires_objs_to_new_mesh(context, context.selected_objects, multires_level, self.include_non_multires)
+        transpose_target, merged_objs = copy_multires_objs_to_new_mesh(context, context.selected_objects, multires_level, self.include_non_multires)
         transpose_target.name = TRANSPOSE_TARGET_NAME
 
         for obj in context.selected_objects:
             obj.select_set(False)
+
+        if self.hide_original:
+            for obj in merged_objs:
+                obj.hide_set(True)
+
         context.view_layer.objects.active = transpose_target
         transpose_target.select_set(True)
 
@@ -45,15 +51,9 @@ class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
         col = layout.column()
         col.label(text="Settings:", icon="SETTINGS")
 
-        row = col.row()
-        row.scale_y = 1.2
-        row.alignment = 'CENTER'
-
-        row.prop(self, "use_multires_level_as_is", text="Use Multires Level As Is")
-        row = col.row()
-        row.scale_y = 1.2
-        row.alignment = 'CENTER'
-        row.prop(self, "include_non_multires", text="Include Non-Multires Objects")
+        col.prop(self, "use_multires_level_as_is", text="Use Multires Level As Is")
+        col.prop(self, "include_non_multires", text="Include Non-Multires Objects")
+        col.prop(self, "hide_original", text="Hide Original Objects")
 
         row = col.row()
         row.prop(self, "multires_level", text="Multires Level To Use")
@@ -73,6 +73,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
     auto_iterations: bpy.props.BoolProperty(name="Auto Iterations", default=True)
     max_auto_iterations: bpy.props.IntProperty(name="Max Auto Iterations", default=100, min=1)
     iterations: bpy.props.IntProperty(name="Max Iterations", default=5, min=1)
+    hide_transpose: bpy.props.BoolProperty(name="Hide Transpose Target", default=False)
 
     def execute(self, context):
         start_time = time.time()
@@ -85,6 +86,8 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         transpose_targets = create_meshes_by_original_name(active_obj)
         self.logger.debug(f"Created {len(transpose_targets)} transpose targets")
 
+        original_objects = []
+
         for object in transpose_targets:
             # Parse the original object name from the transpose target name
             original_obj_name = ""
@@ -95,6 +98,10 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
                 continue
 
             original_obj = bpy.data.objects[original_obj_name]
+            # Make sure that it shows in the depsgraph
+            original_obj.hide_set(False)
+
+            original_objects.append(original_obj)
             with bmesh_from_obj(object) as bm:
                 # A mesh after being split is not guaranteed to have the same vertex indices as the original mesh
                 restore_vertex_index(bm)
@@ -152,6 +159,9 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         for obj in transpose_targets:
             bpy.data.objects.remove(obj, do_unlink=True, do_id_user=True, do_ui_user=True)
 
+        if self.hide_transpose:
+            active_obj.hide_set(True)
+
         self.logger.debug(f"Time taken to apply Transpose Target: {time.time() - start_time}")
         return {'FINISHED'}
 
@@ -160,8 +170,8 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         col = layout.column()
         col.label(text="Settings:", icon="SETTINGS")
 
-        row = col.row()
-        row.prop(self, "auto_iterations", text="Auto Iterations")
+        col.prop(self, "auto_iterations", text="Auto Iterations")
+        col.prop(self, "hide_transpose", text="Hide Transpose Target")
 
         if self.auto_iterations:
             row = col.row()
