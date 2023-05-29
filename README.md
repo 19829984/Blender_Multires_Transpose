@@ -1,6 +1,12 @@
 # Multires Transpose
 An addon inspired by ZBrush's Transpose Master Plugin. It aims to mimic its functionality by allowing the user to edit an arbitrary number of multiresolution modifier-enabled meshes at once through a single lower subdivision level mesh, with support for objects with different subdivison levels, as well as meshes without the multires modifier.
 
+## How to use:
+UI Panel located in the sidebar of the 3D viewport under `Multires Transpose`
+1. Select meshes to create a Transpose Target proxy mesh for
+2. Click `Create Transpose Target` to create a proxy mesh
+3. Make changes to the proxy mesh
+4. Click `Apply Transpose Target` to apply the changes to the original meshes
 
 ## Features:
 Multires Tranpose Version 1.0.0:
