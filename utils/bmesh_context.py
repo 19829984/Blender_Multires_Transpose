@@ -1,6 +1,7 @@
 import bmesh
 import contextlib
 
+
 @contextlib.contextmanager
 def bmesh_from_obj(obj):
     mesh_data = obj.data
