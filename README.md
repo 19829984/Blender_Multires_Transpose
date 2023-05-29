@@ -19,3 +19,6 @@ Multires Tranpose Version 1.0.0:
     * The makes use of the multires modifier's reshape operator, which may not propagate the changes with 100% accuracy.
     * Therefore you can specify the number of iterations to apply the reshape operator to improve the accuracy of the changes
         * Use auto iteration to automatically reshape the mesh until the changes are within a specified threshold, or until the specified number of iterations have been reached
+
+### Known Limitations
+Facesets are not preserved when creating the transpose target
