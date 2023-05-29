@@ -24,15 +24,14 @@ def set_multires_to_nth_level(objects: Iterable[bpy.types.Object], n: int | None
     """
     changed_objs = set()
     levels = []
-    for obj in objects:
+    for obj in set(objects):
         if obj.type == "MESH":
             for mod in obj.modifiers:
                 if mod.type == "MULTIRES":
                     if n is not None:
                         mod.levels = n
-                    if obj not in changed_objs:
-                        changed_objs.add(obj)
-                        levels.append(mod.levels)
+                    changed_objs.add(obj)
+                    levels.append(mod.levels)
                     break
     return changed_objs, levels
 
