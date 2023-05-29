@@ -83,7 +83,7 @@ def read_layer_data(bm: bmesh.types.BMesh, domain: MeshDomain, layer_type: MeshL
         domain (MeshDomain): Domain to read from
         layer_type (MeshLayerType): Layer type to read from
         layer_name (str): Name of the layer to read from
-        uniform (bool, optional): Whether the data is expected to be uniform. Defaults to False.
+        uniform (bool, optional): Whether the data is expected to be the same across the mesh. Defaults to False.
         start_index (int, optional): Index to start reading data from. Defaults to 0.
         size (int, optional): Number of data to read. Defaults to None.
 
