@@ -124,10 +124,11 @@ def copy_all_layers(src_bmesh: bmesh.types.BMesh, dst_bmesh: bmesh.types.BMesh) 
         get_layer_attr_fns = [operator.attrgetter(layer) for layer in layer_names]
         for get_layer_attr in get_layer_attr_fns:
             attrs = get_layer_attr(layers)  # equivalent to src_bmesh.{domain}.layers.{layer}
-
+            dst_attrs = get_layer_attr(get_layers(dst_bmesh))
             # For loop filters out empty layers
             for name, _ in attrs.items():
-                get_layer_attr(get_layers(dst_bmesh)).new(name)
+                if name not in dst_attrs.keys():
+                    dst_attrs.new(name)
 
 
 def bmesh_from_faces(src_bmesh: bmesh.types.BMesh, faces: Iterable[bmesh.types.BMFace]) -> bmesh.types.BMesh:
@@ -184,21 +185,24 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
         offset = len(bm.verts)
 
         for v in bm_to_add.verts:
-            add_vert(v.co, v)
+            nv = add_vert(v.co, v)
+            nv.copy_from(v)
 
         bm.verts.index_update()
         bm.verts.ensure_lookup_table()
 
         if bm_to_add.faces:
             for face in bm_to_add.faces:
-                add_face(tuple(bm.verts[i.index + offset] for i in face.verts), face)
+                nf = add_face(tuple(bm.verts[i.index + offset] for i in face.verts), face)
+                nf.copy_from(face)
             bm.faces.index_update()
 
         if bm_to_add.edges:
             for edge in bm_to_add.edges:
                 edge_seq = tuple(bm.verts[i.index + offset] for i in edge.verts)
                 try:
-                    add_edge(edge_seq, edge)
+                    ne = add_edge(edge_seq, edge)
+                    ne.copy_from(edge)
                 except ValueError:
                     # edge exists!
                     pass

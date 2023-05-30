@@ -22,3 +22,4 @@ Multires Tranpose Version 1.0.0:
 
 ### Known Limitations
 Facesets are not preserved when creating the transpose target
+Does not work with multiuser data (instancing)

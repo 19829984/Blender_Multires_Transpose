@@ -16,7 +16,7 @@ class LoggerOperator(bpy.types.Operator):
     def __init__(self):
         self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
 
-
+# TODO: Add apply base option for when multires level is 0
 class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
     bl_idname = "multires_transpose.create_transpose_target"
     bl_label = "Create Transpose Target"
