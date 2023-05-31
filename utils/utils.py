@@ -62,8 +62,9 @@ def create_meshes_by_original_name(object: bpy.types.Object) -> List[bpy.types.O
         List[bpy.types.Object]: List of split objects
     """
     split_objects = []
+    depsgraph = bpy.context.evaluated_depsgraph_get()
 
-    with bmesh_from_obj(object) as bm:
+    with bmesh_from_obj(depsgraph.objects[object.name]) as bm:
         original_obj_names = read_layer_data(bm, MeshDomain.FACES, MeshLayerType.STRING, ORIGINAL_OBJECT_NAME_LAYER, uniform=False)
         if not all(original_obj_names):
             raise ValueError("Object does not have original object names recorded on all faces, cannot split to transpose targets")
@@ -142,7 +143,6 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
         record_data_helper(bm, object, multires_levels[i])
         bms.append(bm)
         merged_objs.append(object)
-        print(i, object)
 
     if use_non_multires:
         non_multires_objects = [obj for obj in objects if obj not in multires_objs]
@@ -152,7 +152,6 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
             record_data_helper(bm, object, None)
             bms.append(bm)
             merged_objs.append(object)
-            print(object)
 
     final_bm = bmesh_join(bms)
     final_bm.to_mesh(transpose_target_mesh)
