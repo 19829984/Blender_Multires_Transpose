@@ -60,7 +60,7 @@ class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
         context.view_layer.objects.active = transpose_target
         transpose_target.select_set(True)
 
-        self.logger.debug(f"Time taken to create Transpose Target: {time.time() - start_time}")
+        self.logger.info(f"Time taken to create Transpose Target: {time.time() - start_time}")
         return {"FINISHED"}
 
     def draw(self, context):
@@ -95,7 +95,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
     )
     auto_iterations: bpy.props.BoolProperty(
         name="Auto Iterations",
-        default=True,
+        default=False,
         description="Automatically apply reshape until the threshold is reached."
     )
     max_auto_iterations: bpy.props.IntProperty(name="Max Auto Iterations", default=100, min=1)

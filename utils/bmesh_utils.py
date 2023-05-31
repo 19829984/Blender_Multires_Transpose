@@ -181,20 +181,23 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
     copy_all_layers(list_of_bmeshes[0], bm)
 
     for bm_to_add in list_of_bmeshes:
-        offset = len(bm.verts)
 
         for v in bm_to_add.verts:
             nv = add_vert(v.co, v)
             nv.copy_from(v)
 
-        bm.verts.index_update()
-        bm.verts.ensure_lookup_table()
+    bm.verts.index_update()
+    bm.verts.ensure_lookup_table()
+
+    offset = 0
+    for bm_to_add in list_of_bmeshes:
 
         if bm_to_add.faces:
             for face in bm_to_add.faces:
                 nf = add_face([bm.verts[i.index + offset] for i in face.verts], face)
                 nf.copy_from(face)
-            bm.faces.index_update()
+        offset += len(bm_to_add.verts)
+    bm.faces.index_update()
 
     if normal_update:
         bm.normal_update()
