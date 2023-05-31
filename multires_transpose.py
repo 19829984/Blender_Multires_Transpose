@@ -16,16 +16,33 @@ class LoggerOperator(bpy.types.Operator):
     def __init__(self):
         self.logger = logging.getLogger(__name__ + "." + self.__class__.__name__)
 
-# TODO: Add apply base option for when multires level is 0
+
 class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
     bl_idname = "multires_transpose.create_transpose_target"
     bl_label = "Create Transpose Target"
     bl_options = {'REGISTER', 'UNDO'}
 
-    multires_level: bpy.props.IntProperty(name="Multires Level", default=1, min=0)
-    use_multires_level_as_is: bpy.props.BoolProperty(name="Use Multires Level As Is", default=False)
-    include_non_multires: bpy.props.BoolProperty(name="Include Non-Multires Objects", default=False)
-    hide_original: bpy.props.BoolProperty(name="Hide Original Objects", default=True)
+    multires_level: bpy.props.IntProperty(
+        name="Multires Level",
+        default=1,
+        min=0,
+        description="Multires subdivision level to use when creating the transpose target. Only used if 'Use Multires Level As Is' is disabled"
+    )
+    use_multires_level_as_is: bpy.props.BoolProperty(
+        name="Use Multires Level As Is",
+        default=False,
+        description="Use the current multires level of the selected objects for the transpose target"
+    )
+    include_non_multires: bpy.props.BoolProperty(
+        name="Include Non-Multires Objects",
+        default=False,
+        description="Include objects that do not have a multires modifier in the transpose target"
+    )
+    hide_original: bpy.props.BoolProperty(
+        name="Hide Original Objects",
+        default=True,
+        description="Hide the original objects after creating the transpose target"
+    )
 
     def execute(self, context):
         start_time = time.time()
@@ -69,11 +86,30 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
     bl_label = "Apply Transpose Target"
     bl_options = {'REGISTER', 'UNDO'}
 
-    threshold: bpy.props.FloatProperty(name="Threshold", default=0.01, min=0.0, step=0.01)
-    auto_iterations: bpy.props.BoolProperty(name="Auto Iterations", default=True)
+    threshold: bpy.props.FloatProperty(
+        name="Threshold",
+        default=0.01,
+        min=0.0,
+        step=0.01,
+        description="Threshold for the difference between the original mesh and the transpose target mesh. Only used if Auto Iterations is enabled"
+    )
+    auto_iterations: bpy.props.BoolProperty(
+        name="Auto Iterations",
+        default=True,
+        description="Automatically apply reshape until the threshold is reached."
+    )
     max_auto_iterations: bpy.props.IntProperty(name="Max Auto Iterations", default=100, min=1)
-    iterations: bpy.props.IntProperty(name="Max Iterations", default=5, min=1)
-    hide_transpose: bpy.props.BoolProperty(name="Hide Transpose Target", default=False)
+    iterations: bpy.props.IntProperty(
+        name="Max Iterations",
+        default=1,
+        min=1,
+        description="Maximum number of iterations to apply reshape. Only used if Auto Iterations is disabled"
+    )
+    hide_transpose: bpy.props.BoolProperty(
+        name="Hide Transpose Target",
+        default=False,
+        description="Hide the transpose target after applying it"
+    )
 
     def execute(self, context):
         start_time = time.time()
@@ -85,8 +121,6 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         # Create individual mesh objects as targets for the multires modifier's reshape operation
         transpose_targets = create_meshes_by_original_name(active_obj)
         self.logger.debug(f"Created {len(transpose_targets)} transpose targets")
-
-        original_objects = []
 
         for object in transpose_targets:
             # Parse the original object name from the transpose target name
@@ -100,8 +134,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
             # Make sure that it shows in the depsgraph
             original_obj.hide_set(False)
 
-            original_objects.append(original_obj)
-            with bmesh_from_obj(object) as bm:
+            with bmesh_from_obj(object, write_back=False) as bm:
                 # A mesh after being split is not guaranteed to have the same vertex indices as the original mesh
                 restore_vertex_index(bm)
                 # Apply the inverse transformation of the original object because the original transformation
@@ -168,7 +201,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         col = layout.column()
         col.label(text="Settings:", icon="SETTINGS")
 
-        col.prop(self, "auto_iterations", text="Auto Iterations")
+        col.prop(self, "auto_iterations", text="Auto Iterations. This may take a long time to finish")
         col.prop(self, "hide_transpose", text="Hide Transpose Target")
 
         if self.auto_iterations:

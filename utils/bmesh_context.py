@@ -3,10 +3,11 @@ import contextlib
 
 
 @contextlib.contextmanager
-def bmesh_from_obj(obj):
+def bmesh_from_obj(obj, write_back=True):
     mesh_data = obj.data
     bm = bmesh.new()
     bm.from_mesh(mesh_data)
     yield bm
-    bm.to_mesh(mesh_data)
+    if write_back:
+        bm.to_mesh(mesh_data)
     bm.free()
