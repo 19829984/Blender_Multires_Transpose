@@ -157,6 +157,9 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
     final_bm.to_mesh(transpose_target_mesh)
     final_bm.free()
 
+    for bm in bms:
+        bm.free()
+
     # Reenable disabled modifiers
     for mod in disabled_modifiers:
         mod.show_viewport = True
