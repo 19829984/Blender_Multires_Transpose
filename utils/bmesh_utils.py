@@ -177,7 +177,6 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
     bm = bmesh.new()
     add_vert = bm.verts.new
     add_face = bm.faces.new
-    add_edge = bm.edges.new
 
     copy_all_layers(list_of_bmeshes[0], bm)
 
@@ -193,20 +192,9 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
 
         if bm_to_add.faces:
             for face in bm_to_add.faces:
-                nf = add_face(tuple(bm.verts[i.index + offset] for i in face.verts), face)
+                nf = add_face([bm.verts[i.index + offset] for i in face.verts], face)
                 nf.copy_from(face)
             bm.faces.index_update()
-
-        if bm_to_add.edges:
-            for edge in bm_to_add.edges:
-                edge_seq = tuple(bm.verts[i.index + offset] for i in edge.verts)
-                try:
-                    ne = add_edge(edge_seq, edge)
-                    ne.copy_from(edge)
-                except ValueError:
-                    # edge exists!
-                    pass
-            bm.edges.index_update()
 
     if normal_update:
         bm.normal_update()

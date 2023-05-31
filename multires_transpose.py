@@ -91,8 +91,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         for object in transpose_targets:
             # Parse the original object name from the transpose target name
             original_obj_name = ""
-            with bmesh_from_obj(object) as bm:
-                original_obj_name = object.name[:-len("_Target")]
+            original_obj_name = object.name[:-len("_Target")]
             if original_obj_name not in bpy.data.objects:
                 self.logger.warn(f"Object {object.name} does not have original object name recorded, skipping")
                 continue
@@ -109,7 +108,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
                 # was applied when the transpose target was created
                 bmesh.ops.transform(bm, verts=bm.verts, matrix=original_obj.matrix_world.inverted())
                 # Read the original multires level used to create this transpose target
-                original_multires_level = read_layer_data(bm, MeshDomain.FACES, MeshLayerType.INT, ORIGINAL_SUBDIVISION_LEVEL_LAYER, uniform=True)
+                original_multires_level = read_layer_data(bm, MeshDomain.VERTS, MeshLayerType.INT, ORIGINAL_SUBDIVISION_LEVEL_LAYER, uniform=True)
 
                 # Use the reshape operator to apply the transpose target if the original multires level is greater than 0
                 if original_multires_level > 0:
@@ -125,7 +124,6 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
 
                         # Set the multires level to the original multires level used to create the transpose target
                         multires_modifier.levels = original_multires_level
-
                         if not self.auto_iterations:
                             for _ in range(self.iterations):
                                 bpy.ops.object.multires_reshape(modifier=multires_modifier.name)

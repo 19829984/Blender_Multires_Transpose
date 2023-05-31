@@ -22,7 +22,7 @@ def set_multires_to_nth_level(objects: Iterable[bpy.types.Object], n: int | None
     Returns:
         set[bpy.types.Object], list[int]: Objects that have had they multires level changed, and their subdivision level
     """
-    changed_objs = set()
+    changed_objs = []
     levels = []
     for obj in set(objects):
         if obj.type == "MESH":
@@ -30,7 +30,7 @@ def set_multires_to_nth_level(objects: Iterable[bpy.types.Object], n: int | None
                 if mod.type == "MULTIRES":
                     if n is not None:
                         mod.levels = n
-                    changed_objs.add(obj)
+                    changed_objs.append(obj)
                     levels.append(mod.levels)
                     break
     return changed_objs, levels
@@ -47,6 +47,7 @@ def restore_vertex_index(bm: bmesh.types.BMesh) -> None:
     for v, original_index in zip(bm.verts, original_vertex_indices):
         v.index = original_index
     bm.verts.sort()
+    bm.verts.ensure_lookup_table()
 
 
 def create_meshes_by_original_name(object: bpy.types.Object) -> List[bpy.types.Object]:
@@ -114,28 +115,34 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
         # Record the original vertex indices in the new object's vertex layer
         write_layer_data(bm, MeshDomain.VERTS, MeshLayerType.INT, ORIGINAL_VERTEX_INDEX_LAYER, [v.index for v in bm.verts])
 
-        # Record the original subidivision level in the new object's face layer, or -1 if multires_level is None
-        if multires_level is not None:
-            write_layer_data(bm, MeshDomain.FACES, MeshLayerType.INT, ORIGINAL_SUBDIVISION_LEVEL_LAYER, [multires_level for f in bm.faces])
-        else:
-            write_layer_data(bm, MeshDomain.FACES, MeshLayerType.INT, ORIGINAL_SUBDIVISION_LEVEL_LAYER, [-1 for f in bm.faces])
+        # Record the original subidivision level in the new object's vertex layer, or -1 if multires_level is None
+        write_layer_data(bm, MeshDomain.VERTS, MeshLayerType.INT, ORIGINAL_SUBDIVISION_LEVEL_LAYER, [(multires_level if multires_level is not None else -1) for _ in bm.verts])
 
     # Create new mesh and object, then link it
     transpose_target_mesh = bpy.data.meshes.new(name="Multires_Transpose_Target")
 
     multires_objs, multires_levels = set_multires_to_nth_level(objects, level)
+
+    disabled_modifiers = []
+    # Disable modifiers besides the multires modifier
+    for obj in multires_objs:
+        for mod in obj.modifiers:
+            if mod.type != "MULTIRES":
+                mod.show_viewport = False
+                disabled_modifiers.append(mod)
+
     depsgraph = context.evaluated_depsgraph_get()
 
-    final_bm = bmesh.new()
+    bms = []
     merged_objs = []
 
     for i, object in enumerate(multires_objs):
         bm = bmesh.new()
         bm.from_mesh(depsgraph.objects[object.name].data)
         record_data_helper(bm, object, multires_levels[i])
-        final_bm = bmesh_join([bm, final_bm])
-        bm.free()
+        bms.append(bm)
         merged_objs.append(object)
+        print(i, object)
 
     if use_non_multires:
         non_multires_objects = [obj for obj in objects if obj not in multires_objs]
@@ -143,12 +150,17 @@ def copy_multires_objs_to_new_mesh(context: bpy.types.Context, objects: Iterable
             bm = bmesh.new()
             bm.from_mesh(object.data)
             record_data_helper(bm, object, None)
-            final_bm = bmesh_join([bm, final_bm])
-            bm.free()
+            bms.append(bm)
             merged_objs.append(object)
+            print(object)
 
+    final_bm = bmesh_join(bms)
     final_bm.to_mesh(transpose_target_mesh)
     final_bm.free()
+
+    # Reenable disabled modifiers
+    for mod in disabled_modifiers:
+        mod.show_viewport = True
 
     transpose_target_obj = bpy.data.objects.new(name="Multires_Transpose_Target", object_data=transpose_target_mesh)
     context.collection.objects.link(transpose_target_obj)
