@@ -161,7 +161,7 @@ def bmesh_from_faces(src_bmesh: bmesh.types.BMesh, faces: Iterable[bmesh.types.B
 
     # Copy faces
     for face in faces:
-        dst_bmesh.faces.new(tuple(dst_bmesh.verts[v.index - min_vert_index] for v in face.verts), face)
+        dst_bmesh.faces.new([dst_bmesh.verts[v.index - min_vert_index] for v in face.verts], face)
     dst_bmesh.faces.index_update()
     dst_bmesh.faces.sort()
 

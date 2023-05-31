@@ -75,8 +75,8 @@ def create_meshes_by_original_name(object: bpy.types.Object) -> List[bpy.types.O
             transpose_map[name].append(face)
 
         for obj_name, faces in transpose_map.items():
-            face_index_min = min([f.index for f in faces])
-            face_index_max = max([f.index for f in faces])
+            face_index_min = min(faces, key=lambda f: f.index).index
+            face_index_max = max(faces, key=lambda f: f.index).index
 
             # Create a new bmesh from the faces associated with the original object
             d_bm = bmesh_from_faces(bm, bm.faces[face_index_min:face_index_max + 1])

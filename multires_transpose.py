@@ -60,7 +60,7 @@ class MULTIRES_TRANSPOSE_OT_create_transpose_target(LoggerOperator):
         context.view_layer.objects.active = transpose_target
         transpose_target.select_set(True)
 
-        self.logger.info(f"Time taken to create Transpose Target: {time.time() - start_time}")
+        self.logger.debug(f"Time taken to create Transpose Target: {time.time() - start_time}")
         return {"FINISHED"}
 
     def draw(self, context):
