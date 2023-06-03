@@ -98,7 +98,12 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         default=False,
         description="Automatically apply reshape until the threshold is reached."
     )
-    max_auto_iterations: bpy.props.IntProperty(name="Max Auto Iterations", default=100, min=1)
+    max_auto_iterations: bpy.props.IntProperty(
+        name="Max Auto Iterations",
+        default=100,
+        min=1,
+        description="Maximum number of iterations to apply reshape when Auto Iterations is enabled"
+    )
     iterations: bpy.props.IntProperty(
         name="Max Iterations",
         default=1,
