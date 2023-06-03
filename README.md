@@ -21,5 +21,5 @@ Multires Tranpose Version 1.0.0:
         * Use auto iteration to automatically reshape the mesh until the changes are within a specified threshold, or until the specified number of iterations have been reached
 
 ### Known Limitations
-Facesets are not preserved when creating the transpose target
+Facesets may not be preserved when creating the transpose target
 Does not work with multiuser data (instancing)

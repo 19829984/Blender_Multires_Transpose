@@ -161,7 +161,7 @@ def bmesh_from_faces(src_bmesh: bmesh.types.BMesh, faces: Iterable[bmesh.types.B
 
     # Copy faces
     for face in faces:
-        dst_bmesh.faces.new(tuple(dst_bmesh.verts[v.index - min_vert_index] for v in face.verts), face)
+        dst_bmesh.faces.new([dst_bmesh.verts[v.index - min_vert_index] for v in face.verts], face)
     dst_bmesh.faces.index_update()
     dst_bmesh.faces.sort()
 
@@ -177,36 +177,27 @@ def bmesh_join(list_of_bmeshes: Iterable[bmesh.types.BMesh], normal_update=False
     bm = bmesh.new()
     add_vert = bm.verts.new
     add_face = bm.faces.new
-    add_edge = bm.edges.new
 
     copy_all_layers(list_of_bmeshes[0], bm)
 
     for bm_to_add in list_of_bmeshes:
-        offset = len(bm.verts)
 
         for v in bm_to_add.verts:
             nv = add_vert(v.co, v)
             nv.copy_from(v)
 
-        bm.verts.index_update()
-        bm.verts.ensure_lookup_table()
+    bm.verts.index_update()
+    bm.verts.ensure_lookup_table()
+
+    offset = 0
+    for bm_to_add in list_of_bmeshes:
 
         if bm_to_add.faces:
             for face in bm_to_add.faces:
-                nf = add_face(tuple(bm.verts[i.index + offset] for i in face.verts), face)
+                nf = add_face([bm.verts[i.index + offset] for i in face.verts], face)
                 nf.copy_from(face)
-            bm.faces.index_update()
-
-        if bm_to_add.edges:
-            for edge in bm_to_add.edges:
-                edge_seq = tuple(bm.verts[i.index + offset] for i in edge.verts)
-                try:
-                    ne = add_edge(edge_seq, edge)
-                    ne.copy_from(edge)
-                except ValueError:
-                    # edge exists!
-                    pass
-            bm.edges.index_update()
+        offset += len(bm_to_add.verts)
+    bm.faces.index_update()
 
     if normal_update:
         bm.normal_update()
