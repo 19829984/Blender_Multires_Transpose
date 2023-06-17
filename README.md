@@ -4,7 +4,7 @@ An addon inspired by ZBrush's Transpose Master Plugin. It aims to mimic its func
 Requires Blender 3.0 or later.
 
 ## How to use:
-UI Panel located in the sidebar of the 3D viewport under `Multires Transpose`
+UI Panel located in the sidebar of the 3D viewport under `Edit > Multires Transpose`
 1. Select meshes to create a Transpose Target proxy mesh for
 2. Click `Create Transpose Target` to create a proxy mesh
 3. Make changes to the proxy mesh
