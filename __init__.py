@@ -14,8 +14,8 @@ bl_info = {
     "author": "Bowen Wu",
     "description": "Allow editing an arbitrary number of multiresolution modifier-enabled meshes at once through a single lower subdivision level mesh, with support for objects with different subdivison levels.",
     "blender": (3, 0, 0),
-    "version": (1, 0, 1),
-    "location": "",
+    "version": (1, 0, 2),
+    "location": "3D View > Sidebar > Edit Tab > Multires Transpose Panel",
     "warning": "",
     "category": "Sculpting"
 }

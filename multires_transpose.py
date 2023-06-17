@@ -112,7 +112,7 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
     )
     hide_transpose: bpy.props.BoolProperty(
         name="Hide Transpose Target",
-        default=False,
+        default=True,
         description="Hide the transpose target after applying it"
     )
 
@@ -120,8 +120,6 @@ class MULTIRES_TRANSPOSE_OT_apply_transpose_target(LoggerOperator):
         start_time = time.time()
 
         active_obj = context.active_object
-        if active_obj.name != TRANSPOSE_TARGET_NAME:
-            self.report({'WARNING'}, f"Selected object does not have name {TRANSPOSE_TARGET_NAME}, operation may fail")
 
         # Create individual mesh objects as targets for the multires modifier's reshape operation
         transpose_targets = create_meshes_by_original_name(active_obj)
