@@ -10,6 +10,10 @@ UI Panel located in the sidebar of the 3D viewport under `Edit > Multires Transp
 3. Make changes to the proxy mesh
 4. Click `Apply Transpose Target` to apply the changes to the original meshes
 
+
+https://github.com/19829984/Blender_Multires_Transpose/assets/57331630/7cfed5dc-f0de-46e2-a534-f9e1a5b3fcf5
+
+
 ## Features:
 Multires Tranpose Version 1.0.2:
 * Allows editing an arbitrary number of multiresolution modifier-enabled meshes at once through creating a single lower subdivision level proxy mesh.
@@ -23,6 +27,8 @@ Multires Tranpose Version 1.0.2:
     * Therefore you can specify the number of iterations to apply the reshape operator to improve the accuracy of the changes
         * Use auto iteration to automatically reshape the mesh until the changes are within a specified threshold, or until the specified number of iterations have been reached
 * Multiple Transpose Targets can be created to store different poses.
+  
+https://github.com/19829984/Blender_Multires_Transpose/assets/57331630/0889b592-a5b5-4d20-a5f2-81b7202f1303
 
 ### Known Limitations
 Facesets may not be preserved when creating the transpose target
