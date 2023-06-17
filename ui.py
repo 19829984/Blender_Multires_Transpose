@@ -4,7 +4,7 @@ import bpy
 class MultiresTransposePanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Multires Transpose'
+    bl_category = 'Edit'
 
 
 class MULTIRES_TRANSPOSE_PT_operator_panel(MultiresTransposePanel):
